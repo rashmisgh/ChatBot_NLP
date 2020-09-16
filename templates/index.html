@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta charset="UTF-8">
+	<title>Link ChatBot System</title>
+	<!-- for mobile screens -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- stylesheets are conveniently separated into components -->
+	<link rel="icon" type="image/png" href="static/img/bott.png" sizes="16x16">
+
+	<link rel="stylesheet" media="all" href="static/css/setup.css">
+	<link rel="stylesheet" media="all" href="static/css/says.css">
+	<link rel="stylesheet" media="all" href="static/css/reply.css">
+	<link rel="stylesheet" media="all" href="static/css/typing.css">
+	<link rel="stylesheet" media="all" href="static/css/input.css">
+	<link rel="stylesheet" media="all" href="static/css/main.css">
+	<script type="text/javascript" src="/static/jquery-3.2.1.js"></script>
+
+</head>
+
+<body>
+	<div class="hdr">
+		<table style="float:left;">
+			<tr>
+				<td><img src="static/img/llogo.png" title="Link System" /></td>
+			</tr>
+		</table>
+		<table style="float:right;">
+			<tr>
+				<td><img src="static/img/wlogo.png" style="vertical-align:top;padding-top:11px" title="WESEE" /></td>
+			</tr>
+		</table>
+	</div>
+	<div class="bubble-container" style="background: url(static/img/img3.jpg);">
+		<div class="bubble-wrap" id="chatbox">
+			<div class="bubble say" style="width: 20%;background-color: antiquewhite;">
+				<span class="bubble-content">May I help You.</span>
+			</div>
+			<div class="bubble say" style="width: 140px;">
+				<span class="usreply">Messaging</span><span class="usreply">Tactical</span>
+			</div>
+		</div>
+	</div>
+	</div>
+	<audio class="audioDemo" controls preload="none" style="display:none;">
+		<source src="static/sound2.mp3" type="audio/mpeg">
+	</audio>
+	<script>
+		function getResponse() {
+
+			//var userText = $("#textInput").val();
+			loadData($("#textInput").val());
+			// user reply
+			/*var userHtml ='<div class="bubble reply say"><span class="bubble-content"><span class="bubble-button" style="animation-delay: 0ms;">' + userText + ' </span></span></div>'
+			$("#textInput").val("");
+			$("#chatbox").append(userHtml);
+		
+			//bot reply
+			$.get("/get", { msg: userText }).done(function(data) {
+		var res=data.split("\n");
+		var botHtml = '<div class="bubble say">';
+		$.each(res,function(key,value){
+			botHtml+='<span class="usreply">'+value+'</span>';	
+		});
+		botHtml+='</div>';
+			//var botHtml = '<div class="bubble say"><pre><span class="bubble-content">'+data+'</span></pre></div>';
+			$("#chatbox").append(botHtml);
+		$(".audioDemo").trigger('play');
+		console.log($("#chatbox")[0].scrollHeight);
+		$("#chatbox").scrollTop($("#chatbox")[0].scrollHeight+500);
+		});*/
+		}
+		$("#textInput").keypress(function (e) {
+			if (e.which == 13) {
+				getResponse();
+			}
+		});
+		$("#buttonInput").click(function () {
+			getResponse();
+		});
+		$("body").delegate(".usreply", "click", function () {
+			loadData($(this).html());
+		});
+		function loadData(userText) {
+
+			var userHtml = '<div class="bubble reply say"><span class="bubble-content"><span class="bubble-button" style="animation-delay: 0ms;">' + userText + ' </span></span></div>'
+			$("#chatbox").append(userHtml);
+			$.get("/get", { msg: userText }).done(function (data) {
+				var res = JSON.parse(data);
+				if (Array.isArray(res)) {
+					var botHtml = '<div class="bubble say">';
+					res.forEach(V => {
+						botHtml += '<span class="usreply">' + V + '</span>';
+					})
+					botHtml += '</div>';
+				} else {
+					var botHtml = '<div class="bubble say">';
+					botHtml += '<span class="fans">' + res + '</span>';
+					botHtml += '</div>';
+				}
+
+				$("#chatbox").append(botHtml);
+				document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+				$(".audioDemo").trigger('play');
+			});
+		}
+
+	</script>
+</body>
+
+</html>
