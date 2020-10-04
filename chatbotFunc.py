@@ -1,16 +1,56 @@
 # import necessary libraries
+import numpy
 import pandas as pd
 import io
 import random
 import string  # to process standard python strings
 import json
 
+import math
+import re
+from collections import Counter
+
+WORD = re.compile(r"\w+")
+
+# import tflearn
+# import tensorflow
+
 # read file
-with open('chatbot.json', 'r',encoding='utf-8') as File:
+with open('Chatbot.json', 'r') as File:
     Data = File.read()
 
 # parse file
 JsonObject = json.loads(Data)
+
+
+queries = []
+
+def initQuery():
+    for w in JsonObject.keys():
+        queries.append(w)
+
+
+initQuery()
+
+# Rashmi Singh - Get Cosine - Similarity Vectore
+def get_cosine(vec1, vec2):
+    intersection = set(vec1.keys()) & set(vec2.keys())
+    numerator = sum([vec1[x] * vec2[x] for x in intersection])
+
+    sum1 = sum([vec1[x] ** 2 for x in list(vec1.keys())])
+    sum2 = sum([vec2[x] ** 2 for x in list(vec2.keys())])
+    denominator = math.sqrt(sum1) * math.sqrt(sum2)
+
+    if not denominator:
+        return 0.0
+    else:
+        return float(numerator) / denominator
+
+# Rashmi Singh  - Vector Generation from Text
+def text_to_vector(text):
+    words = WORD.findall(text)
+    return Counter(words)
+
 
 
 # Keyword Matching
@@ -26,7 +66,7 @@ def greeting(sentence):
             return random.choice(GREETING_RESPONSES)
 
 
-# Generating response
+# Generating response -  Rashmi Singh
 def response(user_response):
     if user_response != '':
         if user_response.lower() != 'bye':
@@ -42,9 +82,19 @@ def response(user_response):
         else:
             return "Bye! take care.."
 
-
+# Rashmi Singh - Response Function
 def bot_response(user_response):
-    if user_response not in JsonObject.keys():
-        print("Not In")
-        return json.dumps(user_response, separators=(',', ':'))
-    return json.dumps(JsonObject[user_response], separators=(',', ':'))
+    hasFound = False
+    FoundIndex = -1;
+    MaxCosine = -1;
+    for qIndex in range(len(queries)):
+        CosVal = get_cosine(text_to_vector(user_response.lower()), text_to_vector(queries[qIndex].lower()))
+        if CosVal > MaxCosine and CosVal != 0:
+            MaxCosine = CosVal
+            FoundIndex = qIndex
+    if MaxCosine == -1:
+        return json.dumps("Could Not Understand Question", separators=(',', ':'))
+    return json.dumps(JsonObject[queries[FoundIndex]], separators=(',', ':'))
+
+                        
+ 
